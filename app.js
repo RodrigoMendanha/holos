@@ -518,7 +518,10 @@
       dots[i].setAttribute("cy", y);
     });
 
-    const total = Math.round(scores.reduce((a, b) => a + b, 0) * 2);
+    // O indice vem do motor. Era "soma x 2" escrito aqui — mesma conta, mas
+    // uma segunda copia da regra. O "x 2" so vale enquanto os pesos forem 0,20
+    // e o maximo 100; se o Rodrigo mudar um peso, a tela mentiria calada.
+    const total = indiceDoMotor(scores);
     $("#holo-score-total").textContent = total;
 
     // A escala e 10 = muito bom, decisao registrada no motor. Estava invertida
@@ -586,6 +589,40 @@
     }
   };
 
+  // As chaves do motor sao as dos bancos; as da tela sao abreviadas.
+  const CHAVE_MOTOR = {
+    fungico: "fungico",
+    inflamatorio: "acido_inflamatorio",
+    metabolico: "metabolico",
+    detox: "detox_linfatico",
+    mental: "mental_emocional_espiritual"
+  };
+
+  function notasParaMotor(scores){
+    const notas = {};
+    sistemas.forEach((s, i) => { notas[CHAVE_MOTOR[s]] = scores[i]; });
+    return notas;
+  }
+
+  function indiceDoMotor(scores){
+    if(window.HOLOSCOPE && window.HOLOSCOPE.indiceDeNotas){
+      try { return window.HOLOSCOPE.indiceDeNotas(notasParaMotor(scores)); }
+      catch(e){ console.error("motor:", e); }
+    }
+    // sem o motor carregado, a conta antiga; vale para os pesos de hoje
+    return Math.round(scores.reduce((a, b) => a + b, 0) * 2);
+  }
+
+  function combinacoesDoMotor(scores){
+    if(!window.HOLOSCOPE || !window.HOLOSCOPE.combinacoesDeNotas) return [];
+    try {
+      return window.HOLOSCOPE.combinacoesDeNotas(notasParaMotor(scores));
+    } catch(e){
+      console.error("motor:", e);
+      return [];
+    }
+  }
+
   function lerTerreno(scores){
     const caixa = $("#holo-leitura");
     if(!caixa) return;
@@ -618,6 +655,20 @@
         eixos.set(nome, atual);
       }
     }
+    // LEITURAS COMBINADAS — vem do motor, nao daqui.
+    // combinacoes.csv e avaliado contra as cinco notas. Enquanto nao existe a
+    // tela do questionario, e a nutricionista quem pontua; a leitura ja e do
+    // banco do metodo.
+    const combinadas = combinacoesDoMotor(scores);
+    if(combinadas.length > 0){
+      html += '<h4 class="leitura-titulo">Leitura combinada</h4><div class="leitura-combinadas">';
+      for(const c of combinadas){
+        html += '<div class="leitura-combinada"><b>' + c.leitura + '</b>'
+              + '<span>' + c.id + ' &middot; ' + c.condicao + '</span></div>';
+      }
+      html += '</div>';
+    }
+
     html += '<h4 class="leitura-titulo">Direcao terapeutica</h4><div class="leitura-eixos">';
     for(const [nome, itens] of eixos){
       html += '<div class="leitura-eixo"><b>' + nome + '</b><span>'

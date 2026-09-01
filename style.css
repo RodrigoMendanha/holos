@@ -890,6 +890,20 @@ body.escuro .btn-tema .icone-lua{display:none}
   display:block;font-style:normal;font-size:.56rem;letter-spacing:.24em;
   text-transform:uppercase;color:var(--dourado);margin-bottom:3px;
 }
+.leitura-combinadas{display:flex;flex-direction:column;gap:10px;margin-bottom:30px}
+.leitura-combinada{
+  border:1px solid var(--dourado);border-radius:var(--raio,12px);
+  padding:18px 22px;background:rgba(201,163,90,.08);
+}
+.leitura-combinada b{
+  display:block;font-family:var(--fonte-display);font-size:1.22rem;font-weight:400;
+  color:var(--titulo);line-height:1.35;margin-bottom:6px;
+}
+.leitura-combinada span{
+  font-size:.7rem;letter-spacing:.06em;color:var(--texto-suave);opacity:.8;
+  font-variant-numeric:tabular-nums;
+}
+
 .leitura-eixos{display:flex;flex-direction:column;gap:10px}
 .leitura-eixo{
   display:flex;gap:18px;align-items:baseline;
