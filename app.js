@@ -507,7 +507,7 @@
     radarSVG.innerHTML = svg;
   }
 
-  function updateRadar(scores){
+  function updateRadar(scores, pronta){
     const pontos = scores.map((s, i) => pentagonPoint(s / 10 * R_MAX, i).join(",")).join(" ");
     const fill = radarSVG.querySelector("#radar-fill");
     if(fill) fill.setAttribute("points", pontos);
@@ -521,7 +521,8 @@
     // O indice vem do motor. Era "soma x 2" escrito aqui — mesma conta, mas
     // uma segunda copia da regra. O "x 2" so vale enquanto os pesos forem 0,20
     // e o maximo 100; se o Rodrigo mudar um peso, a tela mentiria calada.
-    const total = indiceDoMotor(scores);
+    // com a Pontuacao pronta, o indice e o dela; sem ela, pede ao motor
+    const total = pronta ? pronta.indice : indiceDoMotor(scores);
     $("#holo-score-total").textContent = total;
 
     // A escala e 10 = muito bom, decisao registrada no motor. Estava invertida
@@ -534,7 +535,7 @@
     else if(total < 80) msg = "Desequilibrios moderados. Atencao aos sistemas de nota mais baixa.";
     else msg = "Terreno equilibrado. Manter acompanhamento preventivo.";
     $("#holo-interpretacao").textContent = msg;
-    lerTerreno(scores);
+    lerTerreno(scores, pronta);
   }
 
 
@@ -623,7 +624,7 @@
     }
   }
 
-  function lerTerreno(scores){
+  function lerTerreno(scores, pronta){
     const caixa = $("#holo-leitura");
     if(!caixa) return;
     if(scores.every(s => s === 0)){ caixa.innerHTML = ""; return; }
@@ -659,7 +660,7 @@
     // combinacoes.csv e avaliado contra as cinco notas. Enquanto nao existe a
     // tela do questionario, e a nutricionista quem pontua; a leitura ja e do
     // banco do metodo.
-    const combinadas = combinacoesDoMotor(scores);
+    const combinadas = pronta ? pronta.combinacoes : combinacoesDoMotor(scores);
     if(combinadas.length > 0){
       html += '<h4 class="leitura-titulo">Leitura combinada</h4><div class="leitura-combinadas">';
       for(const c of combinadas){
@@ -678,6 +679,65 @@
 
     caixa.innerHTML = html;
   }
+
+
+  /* ------------------------------------------------------------------------
+     A PONTE ENTRE O MOTOR E A TELA
+
+     Recebe a Pontuacao inteira que HOLOSCOPE.calcular() devolveu e desenha.
+     Nada aqui recalcula nada: as notas, o indice, as combinacoes e a Triada
+     ja vem prontos. Se esta funcao fizer conta, a conta existe em dois
+     lugares e vai divergir — foi o que aconteceu com a escala invertida.
+
+     As reguas deixam de ser entrada e passam a mostrar o que foi calculado.
+     Elas so andam de 1 em 1, e as notas tem decimal, entao o numero exato
+     aparece ao lado; a regua e so o desenho.
+     --------------------------------------------------------------------- */
+
+  const ORDEM_MOTOR = ["fungico","acido_inflamatorio","metabolico",
+                       "detox_linfatico","mental_emocional_espiritual"];
+
+  window.aplicarPontuacao = function(r){
+    // as notas na ordem que a tela usa
+    const porSistema = {};
+    r.sistemas.forEach(s => { porSistema[s.sistema] = s.nota; });
+    const notas = ORDEM_MOTOR.map(id => porSistema[id] ?? 0);
+
+    sistemas.forEach((s, i) => {
+      const el = $("#holo-" + s);
+      el.value = Math.round(notas[i]);
+      el.disabled = true;                       // virou resultado, nao entrada
+      el.closest(".holo-card").classList.add("calculado");
+      $("#val-" + s).textContent = notas[i].toFixed(1);
+    });
+
+    updateRadar(notas, r);                      // desenha com o decimal, nao com o arredondado
+
+    $("#holo-score-total").textContent = r.indice;
+    $("#holo-origem").innerHTML =
+      "Calculado a partir de <b>" + r.cobertura.respondidos + "</b> respostas"
+      + (r.cobertura.percentual < 100
+          ? ' &middot; cobertura ' + r.cobertura.percentual + '%'
+          : "")
+      + ' &middot; <button type="button" class="btn-relink" id="btn-repontuar">pontuar à mão</button>';
+
+    const rel = $("#btn-repontuar");
+    if(rel) rel.addEventListener("click", () => {
+      sistemas.forEach(s => {
+        const el = $("#holo-" + s);
+        el.disabled = false;
+        el.closest(".holo-card").classList.remove("calculado");
+        $("#val-" + s).textContent = el.value;
+      });
+      $("#holo-origem").textContent = "";
+      updateRadar(sistemas.map(s => parseInt($("#holo-" + s).value) || 0));
+    });
+
+    // o questionario fecha; o mapa e o que importa agora
+    const q = document.getElementById("holoscope-questionario");
+    const m = document.getElementById("holoscope-manual");
+    if(q && m){ q.classList.add("hidden"); m.classList.remove("hidden"); }
+  };
 
   function carregarHoloscope(){
     const p = pacienteAtivo();

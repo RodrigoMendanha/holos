@@ -183,7 +183,22 @@
           <span class="aviso">Selecione um paciente para aplicar o HOLOSCOPE.</span>
         </div>
 
-        <div class="painel-escuro">
+        <!-- Dois caminhos: responder as 87 perguntas, ou pontuar os cinco
+               sistemas a mao. O segundo era o unico que existia. -->
+          <div class="holo-modos">
+            <button type="button" class="btn-verde" id="btn-abrir-questionario">
+              Aplicar questionário &mdash; 87 perguntas
+            </button>
+            <span>ou pontue os cinco sistemas à mão, abaixo</span>
+          </div>
+
+          <div id="holoscope-questionario" class="hidden">
+            <button class="btn-voltar" type="button" id="btn-voltar-manual">&larr; Voltar à pontuação manual</button>
+            <div id="q-lista"></div>
+          </div>
+
+          <div id="holoscope-manual">
+          <div class="painel-escuro">
           <span class="eyebrow">Os 5 Sistemas Centrais</span>
           <h3>Avaliacao Integral do Terreno</h3>
           <p>Pontue cada sistema de 0 (comprometido) a 10 (muito bom). O sistema cruzara tudo e gerara a leitura sistemica.</p>
@@ -264,6 +279,7 @@
               <span class="eyebrow">Indice HOLOS</span>
               <div class="holo-score-numero" id="holo-score-total">0</div>
               <span class="holo-score-label">de 100</span>
+              <p class="holo-origem" id="holo-origem"></p>
               <p class="holo-score-interpretacao" id="holo-interpretacao">Pontue os sistemas para gerar a leitura.</p>
             </div>
           </div>
@@ -301,7 +317,9 @@
           </div>
         </div>
 
-        <div class="citacao clara" style="margin-top:34px">
+        </div>
+
+          <div class="citacao clara" style="margin-top:34px">
           <p>"Seu corpo esta contando uma historia que voce ainda nao ouviu. Quando voce enxerga o que esta por tras, tudo muda."</p>
         </div>
       </section>
@@ -670,6 +688,7 @@
 <script src="/ferramentas.js"></script>
 <script src="/formulario.js"></script>
 <script src="/app.js"></script>
+<script src="/questionario.js"></script>
 <script src="/demo.js"></script>
 </body>
 </html>

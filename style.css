@@ -922,6 +922,95 @@ body.escuro .btn-tema .icone-lua{display:none}
   .leitura-eixo b{width:auto}
 }
 
+
+/* ---------- HOLOSCOPE: questionario das 87 perguntas ---------- */
+
+.holo-modos{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:26px;
+}
+.holo-modos span{font-size:.85rem;font-weight:300;color:var(--texto-suave)}
+
+#holoscope-questionario{margin-bottom:34px}
+
+.q-topo{
+  position:sticky;top:0;z-index:40;
+  background:var(--sup-fundo);
+  padding:16px 0 14px;margin-bottom:8px;
+  border-bottom:1px solid var(--linha,rgba(201,163,90,.18));
+}
+.q-progresso{height:3px;background:rgba(201,163,90,.16);border-radius:2px;margin-bottom:12px}
+.q-progresso i{
+  display:block;height:100%;background:var(--dourado);border-radius:2px;
+  transition:width .2s;
+}
+.q-linha{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.q-conta{font-size:.8rem;font-weight:300;color:var(--texto-suave)}
+.q-conta b{color:var(--dourado);font-weight:600;font-variant-numeric:tabular-nums}
+.q-acoes{display:flex;gap:10px;align-items:center}
+
+.q-bloco{margin-bottom:34px}
+.q-bloco-cabeca{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  padding:14px 0 12px;margin-bottom:6px;
+  border-bottom:1px solid rgba(201,163,90,.16);
+}
+.q-bloco-cabeca b{
+  font-family:var(--fonte-display);font-size:1.2rem;font-weight:500;color:var(--dourado);
+}
+.q-bloco-cabeca span{flex:1;font-size:.84rem;font-weight:300;color:var(--texto-suave)}
+.q-bloco-cabeca em{
+  font-style:normal;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--texto-suave);opacity:.75;
+}
+
+.q-item{
+  display:flex;align-items:center;gap:24px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:1px solid rgba(201,163,90,.07);
+}
+.q-item:last-child{border-bottom:none}
+.q-pergunta{
+  flex:1;min-width:260px;margin:0;
+  font-size:.95rem;font-weight:300;line-height:1.5;color:var(--texto);
+}
+.q-botoes{display:grid;grid-template-columns:repeat(4,minmax(76px,1fr));gap:7px}
+.q-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:9px 6px;border-radius:9px;cursor:pointer;
+  border:1px solid var(--input-borda);background:var(--input-fundo);
+  color:var(--texto-suave);font-size:.56rem;letter-spacing:.08em;
+  text-transform:uppercase;font-weight:400;
+  transition:border-color .15s,background .15s,color .15s;
+}
+.q-btn b{font-family:var(--fonte-display);font-size:.95rem;color:var(--texto);line-height:1}
+.q-btn:hover{border-color:var(--dourado-suave)}
+.q-btn.marcado{border-color:var(--dourado);background:rgba(201,163,90,.14);color:var(--dourado)}
+.q-btn.marcado b{color:var(--dourado)}
+
+.q-erro{
+  border-left:2px solid var(--dourado);padding:12px 0 12px 14px;
+  font-size:.88rem;font-weight:300;color:var(--texto-suave);
+}
+
+/* a regua deixa de ser entrada quando o mapa veio do questionario */
+.holo-card.calculado .holo-range-wrap{opacity:.55}
+.holo-card.calculado input[type="range"]{cursor:default}
+.holo-origem{
+  font-size:.74rem;font-weight:300;color:var(--texto-suave);
+  margin:0 0 10px;line-height:1.5;
+}
+.holo-origem b{color:var(--dourado);font-weight:600}
+.holo-origem:empty{display:none}
+.btn-relink{
+  border:none;background:none;padding:0;cursor:pointer;
+  color:var(--dourado);font-size:.74rem;font-weight:400;
+  text-decoration:underline;text-underline-offset:2px;font-family:inherit;
+}
+
+@media (max-width:760px){
+  .q-item{gap:12px}
+  .q-botoes{grid-template-columns:repeat(4,1fr);width:100%}
+}
+
 @media print{
   .sidebar,.topo,.form-ferramenta,.acoes-form,.mapa-acoes,#toast,.btn-tema,.barra-busca,.barra-paciente,.acoes-topo,.ficha-acoes{display:none!important}
   body,.principal{background:#fff}
