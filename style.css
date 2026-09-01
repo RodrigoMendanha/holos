@@ -82,8 +82,10 @@ input,textarea,select{font-family:inherit}
   overflow-y:auto;
 }
 .sidebar-marca{
-  display:flex;align-items:center;gap:12px;
-  padding:0 8px 24px;margin-bottom:18px;
+  /* empilhado e centrado: o simbolo precisa de ~56px para as escamas da pinha
+     aparecerem, e nessa altura ele nao cabe mais ao lado do nome. */
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;
+  padding:4px 8px 24px;margin-bottom:18px;
   border-bottom:1px solid rgba(201,163,90,.18);
 }
 .sidebar-marca svg{flex-shrink:0}
@@ -91,10 +93,18 @@ input,textarea,select{font-family:inherit}
   font-family:var(--fonte-display);font-weight:600;
   color:var(--creme);font-size:1.02rem;line-height:1.15;letter-spacing:.03em;
 }
+.marca-hero{
+  display:block;color:var(--dourado);margin-bottom:22px;
+  opacity:.92;
+}
 .sidebar-marca .nome em{
   display:block;font-family:var(--fonte-corpo);font-style:normal;
-  font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;
-  color:var(--dourado);margin-top:4px;font-weight:500;
+  /* o descritor cresceu de "Plataforma clinica" para "Plataforma clinica da
+     Nutricao Holistica": com .3em de espacamento ele estourava a sidebar.
+     Menos espacamento, duas linhas, e a leitura continua limpa. */
+  font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+  line-height:1.6;max-width:17ch;margin-inline:auto;
+  color:var(--dourado);margin-top:5px;font-weight:500;
 }
 .nav-titulo{
   font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;
@@ -768,6 +778,130 @@ body.escuro .btn-tema .icone-lua{display:none}
   *,*::before,*::after{animation:none!important;transition:none!important}
   html{scroll-behavior:auto}
 }
+
+/* ---------- ferramentas geradas pelo catalogo ---------- */
+/* Reusam .grupo, .dica, .acoes-form e .btn-verde do formulario do OQ3.
+   O que vem abaixo e so o que aquele formulario ainda nao tinha:
+   escala de 0 a 3, regua de nota, escolha unica e o selo de preenchida. */
+
+.campos{display:flex;flex-direction:column;gap:22px;margin-bottom:26px}
+.aviso-salvo{font-size:.78rem;color:var(--dourado);font-weight:500;letter-spacing:.04em}
+
+/* a regua herdaria o padding e a borda de .grupo input; nao pode */
+.grupo input[type="range"]{
+  padding:0;border:none;background:rgba(201,163,90,.22);
+  height:6px;border-radius:3px;
+}
+.grupo-nota{display:flex;align-items:center;gap:16px}
+.grupo-nota output{
+  min-width:2.4ch;text-align:center;
+  font-family:var(--fonte-display);font-size:1.15rem;font-weight:600;
+  color:var(--dourado);font-variant-numeric:tabular-nums;
+}
+
+.grupo-escala{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.btn-escala{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:11px 6px;border-radius:10px;
+  border:1px solid var(--input-borda);background:var(--input-fundo);
+  color:var(--texto-suave);font-size:.63rem;font-weight:400;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+  transition:border-color .18s,color .18s,background .18s;
+}
+.btn-escala b{
+  font-family:var(--fonte-display);font-size:1.05rem;font-weight:600;
+  color:var(--texto);line-height:1;
+}
+.btn-escala:hover{border-color:var(--dourado-suave)}
+.btn-escala.marcado{
+  border-color:var(--dourado);background:rgba(201,163,90,.13);color:var(--dourado);
+}
+.btn-escala.marcado b{color:var(--dourado)}
+
+.grupo-opcoes{display:flex;flex-wrap:wrap;gap:8px}
+.btn-opcao{
+  padding:10px 20px;border-radius:999px;
+  border:1px solid var(--input-borda);background:var(--input-fundo);
+  color:var(--texto-suave);font-size:.8rem;font-weight:300;cursor:pointer;
+  transition:border-color .18s,color .18s,background .18s;
+}
+.btn-opcao:hover{border-color:var(--dourado-suave)}
+.btn-opcao.marcado{
+  border-color:var(--dourado);background:rgba(201,163,90,.13);color:var(--dourado);
+}
+
+.ferr-status.preenchida{
+  color:var(--verde-medio,#3f7d5e);
+  border:1px solid currentColor;background:rgba(63,125,94,.12);
+}
+
+@media (max-width:640px){
+  .grupo-escala{grid-template-columns:repeat(2,1fr)}
+}
+
+
+.regua-pontas{
+  display:block;font-style:normal;font-size:.5rem;letter-spacing:.14em;
+  text-transform:none;color:var(--texto-suave);opacity:.75;margin-top:3px;
+}
+
+/* ---------- HOLOSCOPE: leitura do terreno ---------- */
+/* O numero sozinho nao e o produto. Isto mostra o padrao emocional, o impacto
+   espiritual dos sistemas mais baixos e por onde a conduta comeca. */
+
+.holo-leitura{margin-top:32px}
+.holo-leitura:empty{display:none}
+.leitura-titulo{
+  font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--dourado);font-weight:600;margin:0 0 16px;
+}
+.leitura-sistemas{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:30px;
+}
+.leitura-sistema{
+  border:1px solid rgba(201,163,90,.22);border-radius:var(--raio,12px);
+  padding:20px 22px;background:rgba(201,163,90,.05);
+}
+.leitura-cabeca{
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  margin-bottom:14px;padding-bottom:12px;
+  border-bottom:1px solid rgba(201,163,90,.16);
+}
+.leitura-cabeca b{
+  font-family:var(--fonte-display);font-size:1.02rem;font-weight:400;
+  color:var(--titulo);line-height:1.25;
+}
+.leitura-nota{
+  font-family:var(--fonte-display);font-size:1.5rem;color:var(--dourado);
+  font-variant-numeric:tabular-nums;flex-shrink:0;
+}
+.leitura-sistema p{
+  font-size:.86rem;font-weight:300;line-height:1.5;
+  color:var(--texto-suave);margin:0 0 8px;
+}
+.leitura-sistema p:last-child{margin-bottom:0}
+.leitura-sistema em{
+  display:block;font-style:normal;font-size:.56rem;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--dourado);margin-bottom:3px;
+}
+.leitura-eixos{display:flex;flex-direction:column;gap:10px}
+.leitura-eixo{
+  display:flex;gap:18px;align-items:baseline;
+  padding:14px 20px;border-radius:10px;
+  border:1px solid rgba(201,163,90,.16);
+}
+.leitura-eixo b{
+  font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--realce);font-weight:600;width:19ch;flex-shrink:0;
+}
+.leitura-eixo span{font-size:.86rem;font-weight:300;color:var(--texto-suave);line-height:1.5}
+
+@media (max-width:820px){
+  .leitura-sistemas{grid-template-columns:1fr}
+  .leitura-eixo{flex-direction:column;gap:6px}
+  .leitura-eixo b{width:auto}
+}
+
 @media print{
   .sidebar,.topo,.form-ferramenta,.acoes-form,.mapa-acoes,#toast,.btn-tema,.barra-busca,.barra-paciente,.acoes-topo,.ficha-acoes{display:none!important}
   body,.principal{background:#fff}

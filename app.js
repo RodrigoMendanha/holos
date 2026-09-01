@@ -89,6 +89,10 @@
   }
   $$(".card-ferr[data-vista]").forEach(c => c.addEventListener("click", () => abrirFerramenta(c.dataset.vista)));
 
+  // formulario.js precisa abrir a vista generica; e a unica coisa que ele
+  // enxerga daqui de dentro.
+  window.abrirFerramenta = abrirFerramenta;
+
   /* ---------- busca dentro dos modulos ---------- */
   function semAcento(t){
     return t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -136,7 +140,7 @@
     input.addEventListener("input", filtrar);
     input.addEventListener("keydown", e => {
       if(e.key === "Escape"){ input.value = ""; filtrar(); }
-      if(e.key === "Enter"){ e.preventDefault(); const p = cards.find(c => !c.classList.contains("oculto") && c.dataset.vista); if(p) abrirFerramenta(p.dataset.vista); }
+      if(e.key === "Enter"){ e.preventDefault(); const p = cards.find(c => !c.classList.contains("oculto")); if(p) p.click(); }
     });
     campo.querySelector(".btn-limpar-busca").addEventListener("click", () => { input.value = ""; filtrar(); input.focus(); });
   });
@@ -461,11 +465,26 @@
     return Array.from({length:5}, (_, i) => pentagonPoint(r, i).join(",")).join(" ");
   }
 
+  // PHI. O material pede "assinatura da proporcao aurea e geometria sagrada":
+  // os aneis deixam de ser igualmente espacados e passam a decrescer por PHI, e
+  // entra o pentagrama, cujas diagonais se cortam exatamente nessa razao.
+  const PHI = (1 + Math.sqrt(5)) / 2;
+
   function initRadar(){
     let svg = '';
-    [24,48,72,96,120].forEach(r => {
-      svg += '<polygon points="'+pentagonPoints(r)+'" fill="none" stroke="rgba(201,163,90,.15)" stroke-width="1"/>';
-    });
+    svg += '<circle cx="'+CX+'" cy="'+CY+'" r="'+(R_MAX*1.06)+'" fill="none" '
+         + 'stroke="rgba(201,163,90,.10)" stroke-width="1"/>';
+    let r = R_MAX;
+    for(let k = 0; k < 5; k++){
+      svg += '<polygon points="'+pentagonPoints(r)+'" fill="none" '
+           + 'stroke="rgba(201,163,90,'+(0.055 + k*0.028).toFixed(3)+')" stroke-width="1"/>';
+      r = r / PHI;
+    }
+    // pentagrama: liga cada vertice ao segundo seguinte
+    let estrela = [];
+    for(let i = 0; i < 5; i++) estrela.push(pentagonPoint(R_MAX, (i*2) % 5).join(","));
+    svg += '<polygon points="'+estrela.join(" ")+'" fill="none" '
+         + 'stroke="rgba(201,163,90,.08)" stroke-width="1"/>';
     for(let i = 0; i < 5; i++){
       const [x, y] = pentagonPoint(R_MAX, i);
       svg += '<line x1="'+CX+'" y1="'+CY+'" x2="'+x+'" y2="'+y+'" stroke="rgba(201,163,90,.2)" stroke-width="1"/>';
@@ -493,12 +512,111 @@
     const total = Math.round(scores.reduce((a, b) => a + b, 0) * 2);
     $("#holo-score-total").textContent = total;
 
+    // A escala e 10 = muito bom, decisao registrada no motor. Estava invertida
+    // aqui: antes, indice alto era diagnosticado como estado grave. Duas partes
+    // do mesmo produto mediam ao contrario.
     let msg = "Pontue os sistemas para gerar a leitura.";
-    if(total > 0 && total <= 30) msg = "Terreno relativamente equilibrado. Manter acompanhamento preventivo.";
-    else if(total <= 50) msg = "Desequilibrios moderados detectados. Atencao aos sistemas mais pontuados.";
-    else if(total <= 70) msg = "Desequilibrios significativos. Intervencao terapeutica recomendada.";
-    else if(total > 70) msg = "Estado cronico de ameaca. Abordagem integrativa urgente: corpo, mente e espirito.";
+    if(total === 0) msg = "Pontue os sistemas para gerar a leitura.";
+    else if(total < 40) msg = "Estado cronico de ameaca. Abordagem integrativa urgente: corpo, mente e espirito.";
+    else if(total < 60) msg = "Desequilibrios significativos. Intervencao terapeutica recomendada.";
+    else if(total < 80) msg = "Desequilibrios moderados. Atencao aos sistemas de nota mais baixa.";
+    else msg = "Terreno equilibrado. Manter acompanhamento preventivo.";
     $("#holo-interpretacao").textContent = msg;
+    lerTerreno(scores);
+  }
+
+
+  /* ------------------------------------------------------------------------
+     LEITURA DO TERRENO
+     O material promete que o HOLOSCOPE nao devolve so sintoma fisico, mas o
+     padrao emocional e o impacto espiritual de cada sistema — e uma direcao
+     terapeutica. A tela mostrava so o numero. Isto preenche o resto.
+
+     Os padroes vem literais do material do Rodrigo. O roteamento sistema ->
+     eixo terapeutico e leitura minha das tres listas que ele escreveu
+     (Neuroregulacao, Reprogramacao Metabolica, Inteligencia Espiritual) e
+     precisa da revisao dele antes de ir a paciente.
+     --------------------------------------------------------------------- */
+
+  const TERRENO = {
+    fungico: {
+      nome: "Sistema Fungico",
+      emocional: "estagnacao e desordem",
+      espiritual: "perda de vitalidade e clareza",
+      eixos: [["Reprogramacao Metabolica", "microbiota, anti-inflamatorio, nutrientes"],
+              ["Inteligencia Espiritual", "praticas contemplativas, consciencia"]]
+    },
+    inflamatorio: {
+      nome: "Sistema Acido-Inflamatorio",
+      emocional: "irritacao, raiva, reatividade",
+      espiritual: "bloqueio no plexo solar",
+      eixos: [["Reprogramacao Metabolica", "anti-inflamatorio, detoxificacao"],
+              ["Neuroregulacao", "estrategias vagais, respiracao"]]
+    },
+    metabolico: {
+      nome: "Sistema Metabolico",
+      emocional: "vazio, falta de proposito",
+      espiritual: "dessintonizacao do corpo como templo",
+      eixos: [["Reprogramacao Metabolica", "metabolismo, suplementacao, nutrientes"],
+              ["Neuroregulacao", "dopamina natural, sono"],
+              ["Inteligencia Espiritual", "proposito, autopercepcao"]]
+    },
+    detox: {
+      nome: "Sistema Detox + Linfatico",
+      emocional: "acumulo de magoas, emocoes nao processadas",
+      espiritual: "bloqueio do fluxo",
+      eixos: [["Reprogramacao Metabolica", "detoxificacao, microbiota"],
+              ["Neuroregulacao", "respiracao, grounding"]]
+    },
+    mental: {
+      nome: "Sistema Mental-Emocional-Espiritual",
+      emocional: "desconexao de si",
+      espiritual: "queda de frequencia geral",
+      eixos: [["Neuroregulacao", "estrategias vagais, sono, mindfulness"],
+              ["Inteligencia Espiritual", "coerencia interna, journaling, consciencia"]]
+    }
+  };
+
+  function lerTerreno(scores){
+    const caixa = $("#holo-leitura");
+    if(!caixa) return;
+    if(scores.every(s => s === 0)){ caixa.innerHTML = ""; return; }
+
+    // as duas notas mais baixas: e por onde a conduta comeca
+    const ordem = sistemas
+      .map((s, i) => ({ chave: s, nota: scores[i], dado: TERRENO[s] }))
+      .sort((a, b) => a.nota - b.nota);
+    const criticos = ordem.slice(0, 2);
+
+    let html = '<h4 class="leitura-titulo">O terreno por tras do numero</h4>';
+    html += '<div class="leitura-sistemas">';
+    for(const c of criticos){
+      html += '<div class="leitura-sistema">'
+            + '<div class="leitura-cabeca"><b>' + c.dado.nome + '</b>'
+            + '<span class="leitura-nota">' + c.nota.toFixed(1) + '</span></div>'
+            + '<p><em>padrao emocional</em>' + c.dado.emocional + '</p>'
+            + '<p><em>impacto espiritual</em>' + c.dado.espiritual + '</p>'
+            + '</div>';
+    }
+    html += '</div>';
+
+    // junta os eixos dos dois sistemas, sem repetir
+    const eixos = new Map();
+    for(const c of criticos){
+      for(const [nome, itens] of c.dado.eixos){
+        const atual = eixos.get(nome) || new Set();
+        itens.split(", ").forEach(i => atual.add(i));
+        eixos.set(nome, atual);
+      }
+    }
+    html += '<h4 class="leitura-titulo">Direcao terapeutica</h4><div class="leitura-eixos">';
+    for(const [nome, itens] of eixos){
+      html += '<div class="leitura-eixo"><b>' + nome + '</b><span>'
+            + Array.from(itens).join(" &middot; ") + '</span></div>';
+    }
+    html += '</div>';
+
+    caixa.innerHTML = html;
   }
 
   function carregarHoloscope(){
