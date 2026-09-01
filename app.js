@@ -202,7 +202,16 @@
     carregarFormularios();
     carregarHoloscope();
     renderizarMapa();
+    // as 30 ferramentas guardam por paciente; formulario.js precisa saber
+    if(typeof window.aoTrocarPaciente === "function") window.aoTrocarPaciente();
   }
+
+  // o que formulario.js enxerga daqui de dentro
+  window.pacienteAtivoId = () => estado.ativo || null;
+  window.pacienteAtivoNome = () => {
+    const p = pacienteAtivo();
+    return p ? p.nome : null;
+  };
 
   $$(".seletor-paciente").forEach(s => {
     s.addEventListener("change", () => {

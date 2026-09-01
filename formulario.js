@@ -26,23 +26,61 @@
     return null;
   }
 
-  /* ---------- [SUPABASE] guardar e buscar ------------------------------- */
+  /* ---------- [SUPABASE] guardar e buscar -------------------------------
 
-  function tudo() {
+     As respostas sao guardadas por PACIENTE. Antes ficavam numa chave unica,
+     entao preencher a mesma ferramenta para o segundo paciente apagava o
+     primeiro — sem barulho nenhum, porque a tela nao mostrava de quem era.
+
+     Formato:
+       { "<paciente_id>": { "<ferramenta_id>": { campo: valor } } }
+
+     Quem nao tem paciente selecionado cai em SEM_PACIENTE. Isso mantem a
+     ferramenta utilizavel solta e o modo demonstracao funcionando.
+
+     Na ida para o Supabase, a tabela ferramentas_respostas ja nasce com a
+     coluna paciente_id e estas tres funcoes sao as unicas que mudam.
+     --------------------------------------------------------------------- */
+
+  var SEM_PACIENTE = "_sem_paciente";
+
+  function pacienteAtual() {
     try {
-      return JSON.parse(localStorage.getItem(CHAVE)) || {};
+      return (window.pacienteAtivoId && window.pacienteAtivoId()) || SEM_PACIENTE;
     } catch (e) {
-      return {};
+      return SEM_PACIENTE;
     }
   }
 
+  function tudo() {
+    var bruto;
+    try {
+      bruto = JSON.parse(localStorage.getItem(CHAVE)) || {};
+    } catch (e) {
+      return {};
+    }
+    // formato antigo era { ferramenta_id: {...} }; recolhe para SEM_PACIENTE
+    var conhecidas = (window.CATALOGO_FERRAMENTAS || []).map(function (f) { return f.id; });
+    var antigo = Object.keys(bruto).some(function (k) { return conhecidas.indexOf(k) !== -1; });
+    if (antigo) {
+      var migrado = {};
+      migrado[SEM_PACIENTE] = bruto;
+      localStorage.setItem(CHAVE, JSON.stringify(migrado));
+      return migrado;
+    }
+    return bruto;
+  }
+
   function lerRespostas(ferramentaId) {
-    return tudo()[ferramentaId] || {};
+    var t = tudo();
+    return (t[pacienteAtual()] || {})[ferramentaId] || {};
   }
 
   function gravarRespostas(ferramentaId, dados) {
     var t = tudo();
-    t[ferramentaId] = dados;
+    var chave = pacienteAtual();
+    if (!t[chave]) t[chave] = {};
+    t[chave][ferramentaId] = dados;
     localStorage.setItem(CHAVE, JSON.stringify(t));
   }
 
@@ -102,6 +140,19 @@
            dica + ctrl + "</div>";
   }
 
+  /** Sem isto, quem preenche nao sabe para quem esta preenchendo. */
+  function faixaPaciente() {
+    var nome = null;
+    try { nome = window.pacienteAtivoNome && window.pacienteAtivoNome(); } catch (e) {}
+    if (nome) {
+      return '<p class="form-sub">Preenchendo para <b class="form-paciente">' +
+             escapar(nome) + "</b>. Preencha durante ou logo apos o atendimento.</p>";
+    }
+    return '<p class="form-sub form-sem-paciente">Nenhum paciente selecionado — ' +
+           "as respostas ficam soltas. Escolha um paciente em Pacientes para " +
+           "guardar na ficha dele.</p>";
+  }
+
   /* ---------- desenhar a ferramenta inteira ------------------------------ */
 
   function desenhar(ferramenta, alvo) {
@@ -120,7 +171,7 @@
         "<p>" + escapar(ferramenta.descricao) + "</p>" +
       "</div>" +
       '<div class="form-ferramenta">' +
-        '<p class="form-sub">Preencha durante ou logo apos o atendimento.</p>' +
+        faixaPaciente() +
         '<div class="campos">' + campos + "</div>" +
         '<div class="acoes-form">' +
           '<button class="btn-verde" type="button" data-acao="salvar">Salvar</button>' +
@@ -165,6 +216,7 @@
       if (cab) cab.classList.remove("hidden");
       var bus = secao.querySelector(".barra-busca");
       if (bus) bus.classList.remove("hidden");
+      aberta = null;
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
@@ -220,6 +272,18 @@
 
   /* ---------- abrir ------------------------------------------------------ */
 
+  var aberta = null;   // ficha aberta agora, para redesenhar se o paciente mudar
+
+  /* app.js chama isto toda vez que o paciente ativo muda. Sem isso a tela
+     continuaria mostrando as respostas do paciente anterior. */
+  window.aoTrocarPaciente = function () {
+    var cards = document.querySelectorAll("[data-ferramenta]");
+    for (var i = 0; i < cards.length; i++) marcarCard(cards[i].dataset.ferramenta);
+    if (aberta && !aberta.alvo.classList.contains("hidden")) {
+      desenhar(aberta.f, aberta.alvo);
+    }
+  };
+
   document.addEventListener("DOMContentLoaded", function () {
     var cards = document.querySelectorAll("[data-ferramenta]");
     for (var i = 0; i < cards.length; i++) {
@@ -230,6 +294,7 @@
           if (!f) return;
           var alvo = document.getElementById("vista-gen-" + f.modulo);
           if (!alvo) return;
+          aberta = { f: f, alvo: alvo };
           desenhar(f, alvo);
           window.abrirFerramenta("vista-gen-" + f.modulo);
         });

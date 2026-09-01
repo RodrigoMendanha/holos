@@ -779,6 +779,12 @@ body.escuro .btn-tema .icone-lua{display:none}
   html{scroll-behavior:auto}
 }
 
+.form-paciente{color:var(--dourado);font-weight:500}
+.form-sem-paciente{
+  border-left:2px solid var(--dourado);padding-left:14px;
+  color:var(--texto-suave);
+}
+
 /* ---------- ferramentas geradas pelo catalogo ---------- */
 /* Reusam .grupo, .dica, .acoes-form e .btn-verde do formulario do OQ3.
    O que vem abaixo e so o que aquele formulario ainda nao tinha:
