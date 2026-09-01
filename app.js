@@ -712,6 +712,7 @@
     });
 
     updateRadar(notas, r);                      // desenha com o decimal, nao com o arredondado
+    desenharTriada(r.triada);
 
     $("#holo-score-total").textContent = r.indice;
     $("#holo-origem").innerHTML =
@@ -730,6 +731,7 @@
         $("#val-" + s).textContent = el.value;
       });
       $("#holo-origem").textContent = "";
+      desenharTriada(null);   // pontuando a mao nao ha Triada: ela vem das respostas
       updateRadar(sistemas.map(s => parseInt($("#holo-" + s).value) || 0));
     });
 
@@ -738,6 +740,88 @@
     const m = document.getElementById("holoscope-manual");
     if(q && m){ q.classList.add("hidden"); m.classList.remove("hidden"); }
   };
+
+
+  /* ------------------------------------------------------------------------
+     TRIADA HOLOS — fisico, mental, espiritual
+
+     "Integracao fisico-mental-espiritual em um unico grafico", uma das cinco
+     subferramentas do material. O motor ja calculava e a tela nunca mostrou.
+
+     Vem da ORIGEM do marcador, nao das notas dos cinco sistemas: sintoma conta
+     para fisico, emocao para mental, espiritual para espiritual. Por isso so
+     existe com o questionario respondido — pontuando a mao nao ha como saber.
+
+     Tres eixos, entao o grafico e um triangulo. E a forma da marca.
+     --------------------------------------------------------------------- */
+
+  const EIXOS_TRIADA = [
+    ["fisico", "Físico", "o que o corpo mostra"],
+    ["mental", "Mental", "o que a emoção mostra"],
+    ["espiritual", "Espiritual", "o que o propósito mostra"]
+  ];
+
+  function pontoTriada(cx, cy, raio, valor, i){
+    const ang = -Math.PI / 2 + i * 2 * Math.PI / 3;
+    const r = raio * (valor / 10);
+    return [cx + r * Math.cos(ang), cy + r * Math.sin(ang)];
+  }
+
+  function desenharTriada(triada){
+    const caixa = $("#holo-triada");
+    if(!caixa) return;
+    if(!triada){ caixa.classList.add("hidden"); caixa.innerHTML = ""; return; }
+
+    const L = 260, C = L / 2, R = 88;
+    const valores = EIXOS_TRIADA.map(e => triada[e[0]] ?? 0);
+
+    // moldura: triangulos concentricos em 1/4, 1/2, 3/4 e cheio
+    let svg = "";
+    for(const f of [0.25, 0.5, 0.75, 1]){
+      const p = [0,1,2].map(i => pontoTriada(C, C, R * f, 10, i).map(n => n.toFixed(1)).join(",")).join(" ");
+      svg += '<polygon points="' + p + '" fill="none" stroke="rgba(201,163,90,'
+           + (f === 1 ? ".26" : ".12") + ')" stroke-width="1"/>';
+    }
+    for(let i = 0; i < 3; i++){
+      const [x, y] = pontoTriada(C, C, R, 10, i);
+      svg += '<line x1="' + C + '" y1="' + C + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1)
+           + '" stroke="rgba(201,163,90,.14)" stroke-width="1"/>';
+    }
+
+    const area = valores.map((v, i) => pontoTriada(C, C, R, v, i).map(n => n.toFixed(1)).join(",")).join(" ");
+    svg += '<polygon points="' + area + '" fill="rgba(201,163,90,.2)" '
+         + 'stroke="var(--dourado)" stroke-width="2" stroke-linejoin="round"/>';
+    valores.forEach((v, i) => {
+      const [x, y] = pontoTriada(C, C, R, v, i);
+      svg += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4" fill="var(--dourado)"/>';
+    });
+    for(let i = 0; i < 3; i++){
+      const [x, y] = pontoTriada(C, C, R + 22, 10, i);
+      svg += '<text x="' + x.toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="middle" '
+           + 'fill="var(--dourado)" font-size="10" font-weight="600" letter-spacing="1.4">'
+           + EIXOS_TRIADA[i][1].toUpperCase() + "</text>";
+    }
+
+    // o eixo mais baixo e o que a leitura deve olhar primeiro
+    let menor = 0;
+    valores.forEach((v, i) => { if(v < valores[menor]) menor = i; });
+
+    caixa.innerHTML =
+      '<h4 class="leitura-titulo">Triada HOLOS</h4>'
+      + '<div class="triada-corpo">'
+      +   '<svg viewBox="0 0 ' + L + ' ' + L + '" width="' + L + '" height="' + L + '" '
+      +   'class="triada-grafico" aria-hidden="true">' + svg + "</svg>"
+      +   '<div class="triada-eixos">'
+      +     EIXOS_TRIADA.map((e, i) =>
+            '<div class="triada-eixo' + (i === menor ? " menor" : "") + '">'
+            + '<span class="triada-nota">' + valores[i].toFixed(1) + "</span>"
+            + "<b>" + e[1] + "</b><span class=\"triada-sub\">" + e[2] + "</span></div>").join("")
+      +     '<p class="triada-leitura">Dimensão mais baixa: <b>'
+      +       EIXOS_TRIADA[menor][1] + "</b>. É por onde a conduta começa.</p>"
+      +   "</div>"
+      + "</div>";
+    caixa.classList.remove("hidden");
+  }
 
   function carregarHoloscope(){
     const p = pacienteAtivo();

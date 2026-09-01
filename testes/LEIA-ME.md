@@ -18,5 +18,6 @@ Depois:
     node testes/testar-motor.mjs         o motor numa pagina em branco
     node testes/testar-integrado.mjs     o motor dentro da tela do HOLOSCOPE
     node testes/testar-questionario.mjs  as 87 perguntas ate o mapa
+    node testes/testar-triada.mjs        a Triada aparece e some na hora certa
 
 O caso de exemplo (caso.json) e ficticio e vem do repositorio do motor.

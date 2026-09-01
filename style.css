@@ -923,6 +923,48 @@ body.escuro .btn-tema .icone-lua{display:none}
 }
 
 
+/* ---------- Triada HOLOS ---------- */
+.holo-triada{margin-top:32px}
+.triada-corpo{
+  display:flex;align-items:center;gap:38px;flex-wrap:wrap;
+  border:1px solid rgba(201,163,90,.2);border-radius:var(--raio,12px);
+  padding:26px 30px;background:rgba(201,163,90,.04);
+}
+.triada-grafico{flex-shrink:0}
+.triada-eixos{flex:1;min-width:250px}
+.triada-eixo{
+  display:grid;grid-template-columns:3.4ch 1fr;grid-template-rows:auto auto;
+  column-gap:16px;align-items:baseline;
+  padding:12px 0;border-bottom:1px solid rgba(201,163,90,.1);
+}
+.triada-eixo:last-of-type{border-bottom:none}
+.triada-nota{
+  grid-row:1 / span 2;align-self:center;
+  font-family:var(--fonte-display);font-size:1.7rem;color:var(--dourado);
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.triada-eixo b{
+  font-family:var(--fonte-display);font-size:1.05rem;font-weight:400;color:var(--titulo);
+}
+.triada-sub{font-size:.78rem;font-weight:300;color:var(--texto-suave)}
+.triada-eixo.menor .triada-nota{color:var(--realce)}
+.triada-eixo.menor b::after{
+  content:"mais baixa";
+  margin-left:10px;font-family:var(--fonte-corpo);font-size:.52rem;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--dourado);
+  border:1px solid rgba(201,163,90,.4);border-radius:999px;padding:3px 8px;
+  vertical-align:middle;
+}
+.triada-leitura{
+  margin:16px 0 0;font-size:.88rem;font-weight:300;line-height:1.55;
+  color:var(--texto-suave);
+}
+.triada-leitura b{color:var(--dourado);font-weight:500}
+
+@media (max-width:720px){
+  .triada-corpo{gap:22px;justify-content:center}
+}
+
 /* ---------- HOLOSCOPE: questionario das 87 perguntas ---------- */
 
 .holo-modos{
