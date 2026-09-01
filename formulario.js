@@ -284,6 +284,23 @@
     }
   };
 
+  /* Abre uma ferramenta de qualquer lugar do app — e o que permite o mapa
+     mandar direto para a conduta, sem a pessoa procurar na galeria. */
+  window.abrirFerramentaPorId = function (id) {
+    var f = catalogo(id);
+    var card = document.querySelector('[data-ferramenta="' + id + '"]');
+    if (f && card) {
+      var nav = document.querySelector('.nav-item[data-secao="' + f.modulo + '"]');
+      if (nav) nav.click();
+      card.click();
+      return true;
+    }
+    // as tres ancoras (OQ3, PQQ, Mapa do Proposito) tem tela propria
+    var ancora = document.querySelector('[data-vista="vista-' + id + '"]');
+    if (ancora) { ancora.click(); return true; }
+    return false;
+  };
+
   document.addEventListener("DOMContentLoaded", function () {
     var cards = document.querySelectorAll("[data-ferramenta]");
     for (var i = 0; i < cards.length; i++) {

@@ -624,6 +624,93 @@
     }
   }
 
+
+  /* ------------------------------------------------------------------------
+     DO MAPA PARA A CONDUTA
+
+     O mapa apontava o problema e parava ali. A direcao terapeutica nomeava os
+     eixos, mas nao dizia qual das 30 ferramentas aplicar — a nutricionista
+     saia da tela sabendo o que esta errado e sem saber o que fazer amanha.
+
+     Cada sistema aponta as ferramentas cujo trabalho responde ao padrao
+     emocional dele. Compulsao por doce, por exemplo, responde a gatilho: por
+     isso o Fungico manda para Gatilhos & Respostas, e nao para uma ferramenta
+     de alimentacao.
+
+     ATENCAO: este roteamento e leitura minha, do mesmo tipo que a de sistema
+     para eixo terapeutico. Precisa da revisao do Rodrigo antes de ir a
+     paciente — quem decide qual ferramenta atende qual sistema e ele.
+     --------------------------------------------------------------------- */
+
+  const CONDUTA = {
+    fungico: [
+      ["gatilhos_respostas", "compulsão por doce responde a gatilho, não a força de vontade"],
+      ["diario_corporal", "separar fome do corpo de vontade da cabeça"],
+      ["mapa_rotina", "onde do dia a compulsão aparece"]
+    ],
+    acido_inflamatorio: [
+      ["reenquadramento", "a reatividade começa num pensamento"],
+      ["ritmo_sono", "sono ruim mantém o corpo em alerta"],
+      ["autocompaixao", "irritação consigo alimenta a de fora"]
+    ],
+    metabolico: [
+      ["pqq", "o vazio pede propósito, não dieta"],
+      ["circulo_sentido", "o que ainda dá sentido"],
+      ["ancoras_motivacao", "o que sustenta quando a vontade cai"]
+    ],
+    detox_linfatico: [
+      ["historia_alimentar", "mágoa antiga tem data de início"],
+      ["diario_emocoes", "o que é engolido junto com a comida"],
+      ["conexao_pertencimento", "quem sustenta e quem drena"]
+    ],
+    mental_emocional_espiritual: [
+      ["autocompaixao", "como ela fala consigo é o terreno"],
+      ["roda_vida", "qual área está puxando as outras"],
+      ["praticas_contemplativas", "religar antes de mudar"]
+    ]
+  };
+
+  const NOME_FERRAMENTA = {
+    pqq: "PQQ — Pra Que Que?",
+    oq3: "OQ³ — O Que Quer · Precisa · Consegue",
+    mapa: "Mapa do Propósito"
+  };
+
+  function nomeDaFerramenta(id){
+    if(NOME_FERRAMENTA[id]) return NOME_FERRAMENTA[id];
+    const lista = window.CATALOGO_FERRAMENTAS || [];
+    const f = lista.find(x => x.id === id);
+    return f ? f.titulo : id;
+  }
+
+  function moduloDaFerramenta(id){
+    if(id === "pqq") return "Mente";
+    if(id === "oq3") return "Corpo";
+    if(id === "mapa") return "Espírito";
+    const lista = window.CATALOGO_FERRAMENTAS || [];
+    const f = lista.find(x => x.id === id);
+    const nomes = { corpo: "Corpo", mente: "Mente", espirito: "Espírito" };
+    return f ? nomes[f.modulo] : "";
+  }
+
+  function montarConduta(criticos){
+    // duas ferramentas do sistema mais baixo, uma do segundo. Nao adianta
+    // devolver dez: ela precisa saber por onde COMECAR.
+    const escolhidas = [];
+    const vistas = new Set();
+    const pega = (chave, quantas) => {
+      for(const [id, porque] of (CONDUTA[chave] || [])){
+        if(escolhidas.length >= 3 || vistas.has(id)) continue;
+        if(quantas-- <= 0) break;
+        vistas.add(id);
+        escolhidas.push({ id, porque, sistema: chave });
+      }
+    };
+    if(criticos[0]) pega(CHAVE_MOTOR[criticos[0].chave] || criticos[0].chave, 2);
+    if(criticos[1]) pega(CHAVE_MOTOR[criticos[1].chave] || criticos[1].chave, 1);
+    return escolhidas;
+  }
+
   function lerTerreno(scores, pronta){
     const caixa = $("#holo-leitura");
     if(!caixa) return;
@@ -677,7 +764,27 @@
     }
     html += '</div>';
 
+    // POR ONDE COMECAR: as ferramentas, com botao que abre cada uma
+    const conduta = montarConduta(criticos);
+    if(conduta.length > 0){
+      html += '<h4 class="leitura-titulo">Por onde começar</h4><div class="leitura-conduta">';
+      for(const c of conduta){
+        html += '<button type="button" class="conduta-item" data-abrir="' + c.id + '">'
+              + '<span class="conduta-modulo">' + moduloDaFerramenta(c.id) + "</span>"
+              + "<b>" + nomeDaFerramenta(c.id) + "</b>"
+              + "<span class=\"conduta-porque\">" + c.porque + "</span>"
+              + '<span class="conduta-abrir">abrir &rarr;</span></button>';
+      }
+      html += "</div>";
+    }
+
     caixa.innerHTML = html;
+
+    caixa.querySelectorAll("[data-abrir]").forEach(b => {
+      b.addEventListener("click", () => {
+        if(window.abrirFerramentaPorId) window.abrirFerramentaPorId(b.dataset.abrir);
+      });
+    });
   }
 
 

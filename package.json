@@ -6,7 +6,7 @@
   "description": "HoloHacking — plataforma clinica da Nutricao Holistica. O app e HTML/CSS/JS puro e nao precisa de build; isto aqui serve so aos testes.",
   "scripts": {
     "servir": "npx --yes serve -l 5500 .",
-    "teste": "node testes/testar-app.mjs && node testes/testar-paciente.mjs && node testes/testar-motor.mjs && node testes/testar-integrado.mjs && node testes/testar-questionario.mjs && node testes/testar-triada.mjs"
+    "teste": "node testes/testar-app.mjs && node testes/testar-paciente.mjs && node testes/testar-motor.mjs && node testes/testar-integrado.mjs && node testes/testar-questionario.mjs && node testes/testar-triada.mjs && node testes/testar-conduta.mjs"
   },
   "devDependencies": {
     "puppeteer-core": "^24.0.0"
